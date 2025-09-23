@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIT Chennai AI Chatbot - Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>VIT Chennai AI Chatbot</h1>
+            <p>Please login or signup to continue</p>
+        </div>
+        
+        <div class="auth-tabs">
+            <button id="loginTab" class="tab active">Login</button>
+            <button id="signupTab" class="tab">Signup</button>
+        </div>
+        
+        <div class="auth-form-container">
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" required placeholder="Enter your email" />
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter your password" />
+                </div>
+                <button type="submit" class="auth-button">Login</button>
+                <div class="oauth-buttons">
+                    <button type="button" id="googleLogin" class="oauth-button google-button">
+                        Login with Google
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Signup Form -->
+            <form id="signupForm" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="signupUsername">Username:</label>
+                    <input type="text" id="signupUsername" required placeholder="Enter your username" />
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email:</label>
+                    <input type="email" id="signupEmail" required placeholder="Enter your email" />
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password:</label>
+                    <input type="password" id="signupPassword" required placeholder="Enter your password" />
+                </div>
+                <button type="submit" class="auth-button">Signup</button>
+                <div class="oauth-buttons">
+                    <button type="button" id="googleSignup" class="oauth-button google-button">
+                        Signup with Google
+                    </button>
+                </div>
+            </form>
+            
+            <!-- OTP Verification Form -->
+            <form id="otpForm" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="otpEmail">Email:</label>
+                    <input type="email" id="otpEmail" required placeholder="Enter your email" readonly />
+                </div>
+                <div class="form-group">
+                    <label for="otpCode">OTP Code:</label>
+                    <input type="text" id="otpCode" required placeholder="Enter the 6-digit OTP" maxlength="6" />
+                </div>
+                <button type="submit" class="auth-button">Verify OTP</button>
+                <button type="button" id="resendOtp" class="auth-button secondary">Resend OTP</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
