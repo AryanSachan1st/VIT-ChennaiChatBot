@@ -1,0 +1,76 @@
+LLM and RAG Implementation in VIT Chennai AI Chatbot
+
+This project implements a Retrieval-Augmented Generation (RAG) system that combines the power of Large Language Models (LLMs) with information retrieval to provide intelligent, context-aware responses about VIT Chennai.
+
+## Large Language Model (LLM) Implementation
+
+The project uses OpenAI's GPT-3.5-turbo model as its core LLM:
+
+1. **Model Selection**: GPT-3.5-turbo is chosen for its balance of performance and cost-effectiveness
+2. **Integration**: The openai npm package (version 4.0.0) is used to connect to OpenAI's API
+3. **Usage**: The LLM is used in the chat completion endpoint to generate responses based on user queries and retrieved context
+4. **System Prompt**: A carefully crafted system prompt guides the LLM to:
+   - Answer questions based on provided context from blog posts
+   - Provide detailed information about the cultural fest when relevant
+   - Direct users to the official website for unrelated queries
+   - Handle general queries about nearby places
+
+## Retrieval-Augmented Generation (RAG) Architecture
+
+The RAG implementation follows a three-stage process:
+
+### 1. Ingestion Pipeline
+- When the server starts, it processes all blog posts in the MongoDB database
+- For each post, the EmbeddingService combines the title and body into a single text
+- This text is sent to OpenAI's text-embedding-3-large model to generate a 3072-dimensional vector embedding
+- The embedding is stored alongside the original post in MongoDB
+- Change streams monitor the database for new posts and automatically generate embeddings for them
+
+### 2. Retrieval Process
+- When a user sends a query, the RetrievalService first converts it to an embedding using the same OpenAI model
+- MongoDB Atlas Vector Search is used to find the most similar blog posts based on cosine similarity
+- The search retrieves up to 5 posts with a similarity score threshold of 0.3
+- Posts with higher similarity scores are considered more relevant to the query
+
+### 3. Generation Process
+- The retrieved blog posts are formatted as context information
+- Both the user's query and the retrieved context are sent to the GPT-3.5-turbo model
+- The system prompt instructs the model to use this context for generating accurate responses
+- The model's response is returned to the frontend along with source attribution
+
+## Key Components
+
+### EmbeddingService (services/embeddingService.js)
+- Uses OpenAI's text-embedding-3-large model
+- Generates 3072-dimensional vector embeddings
+- Processes blog posts by combining title and body
+- Validates existing embeddings to ensure consistency
+
+### RetrievalService (services/retrievalService.js)
+- Implements MongoDB Atlas Vector Search
+- Converts user queries to embeddings for similarity comparison
+- Retrieves and ranks relevant blog posts
+- Filters results based on similarity threshold
+
+### Server.js
+- Orchestrates the entire RAG pipeline
+- Handles the chat endpoint that combines retrieval and generation
+- Manages the ingestion process on startup
+- Implements change streams for real-time embedding generation
+
+## Technologies Used
+
+- **OpenAI API**: For both embeddings and chat completions
+- **MongoDB Atlas**: For data storage and vector search capabilities
+- **Node.js**: JavaScript runtime for backend implementation
+- **Express.js**: Web framework for API endpoints
+
+## Benefits of This Implementation
+
+1. **Contextual Accuracy**: Responses are grounded in actual blog post content, reducing hallucination
+2. **Scalability**: MongoDB Atlas Vector Search can handle large datasets efficiently
+3. **Real-time Updates**: Change streams ensure new content is immediately available for search
+4. **Cost-Effective**: Only retrieves and processes relevant information rather than processing entire dataset
+5. **Source Attribution**: Users can see which blog posts informed the AI's response
+
+This RAG implementation allows the chatbot to provide accurate, up-to-date information about VIT Chennai based on the college's own blog content while leveraging the conversational abilities of the LLM.

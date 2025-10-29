@@ -1,7 +1,7 @@
 const fetch = require('node-fetch').default;
 
 async function testAuthFlow() {
-  const baseUrl = 'http://localhost:3000';
+  const baseUrl = 'http://localhost:3000' || process.env.BASE_URL;
   
   try {
     // Test 1: Try to access chat endpoint without authentication

@@ -413,17 +413,25 @@ app.get('/auth/google/signup', passport.authenticate('google-signup', {
   scope: ['profile', 'email']
 }));
 
-// Google OAuth callback route
-app.get('/auth/google/callback', passport.authenticate('google-signup', {
-  failureRedirect: '/?loginError=Authentication failed.',
-  successRedirect: '/chatbot.html'
-}));
-
-// Google OAuth signup callback route
-app.get('/auth/google/signup/callback', passport.authenticate('google-signup', {
-  failureRedirect: '/?signupError=Authentication failed.',
-  successRedirect: '/chatbot.html'
-}));
+// Generic Google OAuth callback route
+app.get('/auth/google/callback', 
+  (req, res, next) => {
+    // Determine which strategy to use based on the referer header or state parameter
+    const referer = req.get('Referer');
+    const state = req.query.state;
+    
+    if ((referer && referer.includes('signup')) || (state && state.includes('signup'))) {
+      passport.authenticate('google-signup', { failureRedirect: '/' })(req, res, next);
+    } else {
+      passport.authenticate('google-login', { failureRedirect: '/' })(req, res, next);
+    }
+  },
+  (req, res) => {
+    // Create session for Google authenticated user
+    req.session.user = req.user;
+    res.redirect('/chatbot.html');
+  }
+);
 
 // Logout route
 app.post('/logout', (req, res) => {

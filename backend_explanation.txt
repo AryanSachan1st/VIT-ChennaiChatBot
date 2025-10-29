@@ -1,0 +1,46 @@
+Backend Components of VIT Chennai AI Chatbot Application
+
+The backend of the VIT Chennai AI Chatbot is built with Node.js using Express framework. It handles data processing, AI integration, user authentication, and communication between the frontend and various services.
+
+1. **server.js**
+   - Main server file that initializes the Express application
+   - Sets up middleware for session management, authentication, and JSON parsing
+   - Configures MongoDB connection using environment variables
+   - Integrates OpenAI API client for generating AI responses
+   - Implements REST API endpoints for chat, authentication, and blog ingestion
+   - Handles Google OAuth authentication strategy
+   - Manages user sessions and authentication state
+   - Starts the server and initializes the ingestion pipeline
+
+2. **services/authService.js**
+   - Manages user registration, login, and authentication
+   - Handles email verification through OTP (One-Time Password)
+   - Integrates with MongoDB to store and retrieve user data
+   - Implements password hashing using bcrypt for security
+   - Manages Google OAuth user registration and login
+
+3. **services/embeddingService.js**
+   - Integrates with OpenAI's text embedding models
+   - Converts blog posts into vector embeddings for similarity search
+   - Uses text-embedding-3-large model for generating 3072-dimensional embeddings
+   - Processes blog post content to create meaningful vector representations
+
+4. **services/retrievalService.js**
+   - Implements vector similarity search using MongoDB's Atlas Vector Search
+   - Retrieves relevant blog posts based on user queries
+   - Compares vector embeddings to find the most relevant content
+   - Returns ranked results with similarity scores
+
+Key Backend Features:
+- REST API architecture with clearly defined endpoints
+- MongoDB integration for data storage and vector search
+- OpenAI API integration for both embeddings and chat completions
+- Session-based user authentication with secure storage
+- Google OAuth 2.0 authentication support
+- Real-time blog post ingestion pipeline
+- Automatic embedding generation for new content
+- Vector similarity search for contextual responses
+- Error handling and logging for debugging
+- Environment variable configuration for security
+
+The backend is designed to be scalable and secure, handling user authentication while providing intelligent responses through AI integration. It processes blog posts into vector embeddings for efficient retrieval and uses these embeddings to provide contextually relevant answers to user queries.

@@ -46,7 +46,8 @@ if (isAuthPage) {
                 // Redirect to chatbot page
                 window.location.href = '/chatbot.html';
             } else {
-                alert(`Login failed: ${data.error}`);
+                // Show error message in UI instead of alert
+                showErrorMessage(`Login failed: ${data.error}`);
             }
         } catch (error) {
             console.error('Error during login:', error);
@@ -76,7 +77,8 @@ if (isAuthPage) {
                 // Show OTP verification form
                 showOtpForm(email);
             } else {
-                alert(`Signup failed: ${data.error}`);
+                // Show error message in UI instead of alert
+                showErrorMessage(`Signup failed: ${data.error}`);
             }
         } catch (error) {
             console.error('Error during signup:', error);
@@ -110,7 +112,8 @@ if (isAuthPage) {
                 // Redirect to chatbot page
                 window.location.href = '/chatbot.html';
             } else {
-                alert(`OTP verification failed: ${data.error}`);
+                // Show error message in UI instead of alert
+                showErrorMessage(`OTP verification failed: ${data.error}`);
             }
         } catch (error) {
             console.error('Error during OTP verification:', error);
@@ -134,9 +137,9 @@ if (isAuthPage) {
             const data = await response.json();
 
             if (response.ok) {
-                alert('OTP has been resent to your email.');
+                showErrorMessage('OTP has been resent to your email.');
             } else {
-                alert(`Failed to resend OTP: ${data.error}`);
+                showErrorMessage(`Failed to resend OTP: ${data.error}`);
             }
         } catch (error) {
             console.error('Error resending OTP:', error);
@@ -160,15 +163,33 @@ if (isAuthPage) {
         window.location.href = '/auth/google/signup';
     });
 
+    // Function to show error messages in UI
+    function showErrorMessage(message) {
+        // Remove any existing error messages
+        const existingError = document.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Create error message element
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        
+        // Insert error message before the form
+        const authFormContainer = document.querySelector('.auth-form-container');
+        authFormContainer.parentNode.insertBefore(errorDiv, authFormContainer);
+    }
+
     // Check for Google auth errors in URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const signupError = urlParams.get('signupError');
     const loginError = urlParams.get('loginError');
     
     if (signupError) {
-        alert(`Google Signup failed: ${signupError}`);
+        showErrorMessage(`Google Signup failed: ${signupError}`);
     } else if (loginError) {
-        alert(`Google Login failed: ${loginError}`);
+        showErrorMessage(`Google Login failed: ${loginError}`);
     }
 } else {
     // DOM elements for chatbot
