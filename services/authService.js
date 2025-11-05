@@ -330,22 +330,22 @@ class AuthService {
         return { success: true, user: userWithoutPassword };
       }
 
-      // Create new user with Google profile info
-      const newUser = {
-        googleId: profile.id,
-        username: profile.displayName.replace(/\s+/g, '_').toLowerCase(),
-        email: profile.emails[0].value,
-        createdAt: new Date()
-      };
+    // Create new user with Google profile info
+    const newUser = {
+      googleId: profile.id,
+      username: profile.displayName.replace(/\s+/g, '_').toLowerCase(),
+      email: profile.emails[0].value,
+      createdAt: new Date()
+    };
 
-      // Insert user into database
-      const result = await usersCollection.insertOne(newUser);
-      
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = newUser;
-      userWithoutPassword.id = result.insertedId;
-      
-      return { success: true, user: userWithoutPassword };
+    // Insert user into database
+    const result = await usersCollection.insertOne(newUser);
+    
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = newUser;
+    userWithoutPassword._id = result.insertedId;
+    
+    return { success: true, user: userWithoutPassword };
     } catch (error) {
       console.error('Error registering Google user:', error);
       return { success: false, message: error.message };

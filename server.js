@@ -12,7 +12,7 @@ const EmbeddingService = require('./services/embeddingService');
 const RetrievalService = require('./services/retrievalService');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // Session middleware
 app.use(session({
@@ -71,6 +71,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.
   },
   async (req, accessToken, refreshToken, profile, done) => {
     try {
+      console.log('Google login strategy initiated for user:', profile.emails[0].value);
       // For login, only allow existing users
       const db = await connectToDatabase();
       const usersCollection = db.collection('users');
@@ -79,6 +80,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.
       });
       
       if (existingUser) {
+        console.log('Existing user found for Google login:', existingUser.email);
         // If user exists but doesn't have googleId, update it
         if (!existingUser.googleId) {
           await usersCollection.updateOne(
@@ -91,9 +93,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.
         return done(null, userWithoutPassword);
       }
       
+      console.log('No existing user found for Google login:', profile.emails[0].value);
       // If user doesn't exist, don't create account for login
       return done(null, false, { message: 'No user found with this email. Please signup first.' });
     } catch (error) {
+      console.error('Error in Google login strategy:', error);
       return done(error, null);
     }
   }));
@@ -106,15 +110,20 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.
   },
   async (req, accessToken, refreshToken, profile, done) => {
     try {
+      console.log('Google signup strategy initiated for user:', profile.emails[0].value);
       // For signup, create new user if doesn't exist
       const result = await authService.registerGoogleUser(profile);
+      console.log('Google signup result:', result);
       
       if (result.success) {
+        console.log('Google signup successful for user:', result.user.email);
         return done(null, result.user);
       } else {
+        console.log('Google signup failed for user:', profile.emails[0].value, 'with message:', result.message);
         return done(null, false, { message: result.message });
       }
     } catch (error) {
+      console.error('Error in Google signup strategy:', error);
       return done(error, null);
     }
   }));
@@ -407,29 +416,65 @@ app.post('/resend-otp', async (req, res) => {
 });
 
 // Google OAuth routes
-app.get('/auth/google/login', passport.authenticate('google-login', { scope: ['profile', 'email'] }));
+app.get('/auth/google/login', passport.authenticate('google-login', { 
+  scope: ['profile', 'email'],
+  state: 'login'
+}));
 
 app.get('/auth/google/signup', passport.authenticate('google-signup', { 
-  scope: ['profile', 'email']
+  scope: ['profile', 'email'],
+  state: 'signup'
 }));
 
 // Generic Google OAuth callback route
 app.get('/auth/google/callback', 
   (req, res, next) => {
-    // Determine which strategy to use based on the referer header or state parameter
-    const referer = req.get('Referer');
+    // Determine which strategy to use based on the state parameter
     const state = req.query.state;
+    console.log('Google OAuth callback received with state:', state);
+    console.log('Full query parameters:', req.query);
     
-    if ((referer && referer.includes('signup')) || (state && state.includes('signup'))) {
-      passport.authenticate('google-signup', { failureRedirect: '/' })(req, res, next);
+    if (state && state.includes('signup')) {
+      passport.authenticate('google-signup', (err, user, info) => {
+        if (err) {
+          console.error('Google signup authentication error:', err);
+          return res.redirect('/?signupError=Authentication failed');
+        }
+        if (!user) {
+          console.log('Google signup failed:', info);
+          return res.redirect(`/?signupError=${info.message || 'Authentication failed'}`);
+        }
+        // Successfully authenticated, log the user in
+        req.logIn(user, (err) => {
+          if (err) {
+            console.error('Error logging in user after Google signup:', err);
+            return res.redirect('/?signupError=Could not log in user');
+          }
+          console.log('Google signup successful, redirecting to chatbot.html');
+          return res.redirect('/chatbot.html');
+        });
+      })(req, res, next);
     } else {
-      passport.authenticate('google-login', { failureRedirect: '/' })(req, res, next);
+      passport.authenticate('google-login', (err, user, info) => {
+        if (err) {
+          console.error('Google login authentication error:', err);
+          return res.redirect('/?loginError=Authentication failed');
+        }
+        if (!user) {
+          console.log('Google login failed:', info);
+          return res.redirect(`/?loginError=${info.message || 'Authentication failed'}`);
+        }
+        // Successfully authenticated, log the user in
+        req.logIn(user, (err) => {
+          if (err) {
+            console.error('Error logging in user after Google login:', err);
+            return res.redirect('/?loginError=Could not log in user');
+          }
+          console.log('Google login successful, redirecting to chatbot.html');
+          return res.redirect('/chatbot.html');
+        });
+      })(req, res, next);
     }
-  },
-  (req, res) => {
-    // Create session for Google authenticated user
-    req.session.user = req.user;
-    res.redirect('/chatbot.html');
   }
 );
 
@@ -448,10 +493,18 @@ app.post('/logout', (req, res) => {
 function ensureAuthenticated(req, res, next) {
   console.log('Session check:', req.session);
   console.log('Session user:', req.session.user);
+  console.log('Passport user:', req.session.passport && req.session.passport.user);
   // Check for user authenticated via manual login/signup or Google OAuth
-  if (req.session.user || (req.session.passport && req.session.passport.user)) {
+  if (req.session.user) {
     return next();
   }
+  
+  // For Google OAuth users, check passport session and set session.user
+  if (req.session.passport && req.session.passport.user) {
+    req.session.user = req.session.passport.user;
+    return next();
+  }
+  
   res.status(401).json({ error: 'Unauthorized' });
 }
 
