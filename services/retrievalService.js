@@ -24,7 +24,7 @@ class RetrievalService {
       const pipeline = [
         {
           "$vectorSearch": {
-            "index": "vector_index_1",
+            "index": "vector_index_02",
             "path": "embedding",
             "queryVector": queryEmbedding,
             "numCandidates": 200,

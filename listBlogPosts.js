@@ -8,7 +8,7 @@ async function listBlogPosts() {
     await mongoClient.connect();
     console.log('Connected to MongoDB');
     
-    const db = mongoClient.db('blog');
+    const db = mongoClient.db('test');
     const postsCollection = db.collection('posts');
     
     // List all blog posts

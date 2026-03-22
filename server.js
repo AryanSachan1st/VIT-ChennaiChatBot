@@ -1,7 +1,6 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const OpenAI = require('openai');
-const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
@@ -12,7 +11,7 @@ const EmbeddingService = require('./services/embeddingService');
 const RetrievalService = require('./services/retrievalService');
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 // Session middleware
 app.use(session({
@@ -21,7 +20,7 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({ 
     mongoUrl: process.env.MONGODB_URI,
-    dbName: 'blog',
+    dbName: 'test',
     collectionName: 'sessions'
   }),
   cookie: { 
@@ -134,7 +133,7 @@ async function connectToDatabase() {
   try {
     await mongoClient.connect();
     console.log('Connected to MongoDB');
-    return mongoClient.db('blog'); // Connect to the 'blog' database
+    return mongoClient.db('test'); // Connect to the 'test' database
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
     process.exit(1);

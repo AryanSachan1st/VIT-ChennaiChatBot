@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 class AuthService {
   constructor(mongoClient) {
     this.mongoClient = mongoClient;
-    this.dbName = 'blog';
+    this.dbName = 'test';
     
     // Initialize email transporter
     this.transporter = nodemailer.createTransport({

@@ -1,0 +1,11 @@
+{
+  "name": "vit-chennai-frontend",
+  "version": "1.0.0",
+  "description": "Static frontend for VIT Chennai AI Chatbot (served by backend in production)",
+  "scripts": {
+    "dev": "npx serve ."
+  },
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
+}
